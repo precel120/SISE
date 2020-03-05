@@ -33,8 +33,17 @@ class Fifteen:
             options["L"] = [zeroPos[0], zeroPos[1]+1]
         return options
 
+    def checkOrder(self):
+        correct = [*range(1,16),0]
+        wrongPos = []
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j] != correct[i*4+j]:
+                    wrongPos.append([i,j])
+        return wrongPos
+
     def move(self, direction):
-        pass
+        options = self.findOptions()
 
     def printBoard(self):
         print(self.board)
@@ -42,5 +51,4 @@ class Fifteen:
 fif = Fifteen()
 fif.printBoard()
 
-up = fif.findOptions()
-print(up)
+up = fif.checkOrder()
