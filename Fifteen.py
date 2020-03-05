@@ -14,26 +14,33 @@ class Fifteen:
     def swapPosition(self, pos1, pos2):
         self.board[pos1[0]][pos1[1]],  self.board[pos2[0]][pos2[1]] =  self.board[pos2[0]][pos2[1]],  self.board[pos1[0]][pos1[1]]
 
-    def findZero():
+    def findZero(self):
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
                 if self.board[i][j] == 0:
-                    return zeroPos = [i, j]
+                    return [i, j]
 
     def findOptions(self):
-        zeroPos = findZero()
-
+        zeroPos = self.findZero()
+        options = {"U": 0, "R":0, "D":0, "L":0}
+        if  zeroPos[0] > 0 and any(self.board[zeroPos[0]-1][zeroPos[1]] in sublist for sublist in self.board):
+            options["U"] = [zeroPos[0]-1, zeroPos[1]]
+        if  zeroPos[0] < 3 and any(self.board[zeroPos[0]+1][zeroPos[1]] in sublist for sublist in self.board):
+            options["R"] = [zeroPos[0]+1, zeroPos[1]]
+        if  zeroPos[1] > 0 and any(self.board[zeroPos[0]][zeroPos[1]-1] in sublist for sublist in self.board):
+            options["D"] = [zeroPos[0], zeroPos[1]-1]
+        if  zeroPos[1] < 3 and any(self.board[zeroPos[0]][zeroPos[1]+1] in sublist for sublist in self.board):
+            options["L"] = [zeroPos[0], zeroPos[1]+1]
+        return options
 
     def move(self, direction):
-        if direction == "U":
+        pass
 
-    
     def printBoard(self):
         print(self.board)
 
 fif = Fifteen()
 fif.printBoard()
 
-fif.swapPosition([0,0],[1,1])
-
-fif.printBoard()
+up = fif.findOptions()
+print(up)
