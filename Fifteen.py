@@ -1,18 +1,15 @@
-from random import shuffle
+import ast
 
 
 class Fifteen:
-
     def __init__(self):
         self.board = [[0 for x in range(4)] for y in range(4)]
-        temp = [*range(0, 16)]
-        shuffle(temp)
-        with open('fifteen_starting_matrix.txt', 'w') as file:
+        temp = [[0 for x in range(4)] for y in range(4)]
+        with open('Plik z układem początkowym.txt', 'r') as file:
             for i in range(len(self.board)):
-                for j in range(len(self.board[i])):
-                    self.board[i][j] = temp[i * 4 + j]
-                file.write(str(self.board[i]).strip('[]'))
-                file.write('\n')
+                temp[i] = file.readline().strip("\n")
+                temp[i] = list(ast.literal_eval(temp[i]))
+                self.board[i] = temp[i]
 
     def swapPosition(self, pos1, pos2):
         self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][
@@ -23,19 +20,6 @@ class Fifteen:
             for j in range(len(self.board[i])):
                 if self.board[i][j] == 0:
                     return [i, j]
-
-    def findOptions(self):
-        zeroPos = self.findZero()
-        options = {"U": 0, "D": 0, "R": 0, "L": 0}
-        if zeroPos[0] > 0 and any(self.board[zeroPos[0] - 1][zeroPos[1]] in sublist for sublist in self.board):
-            options["U"] = [zeroPos[0] - 1, zeroPos[1]]
-        if zeroPos[0] < 3 and any(self.board[zeroPos[0] + 1][zeroPos[1]] in sublist for sublist in self.board):
-            options["D"] = [zeroPos[0] + 1, zeroPos[1]]
-        if zeroPos[1] < 3 and any(self.board[zeroPos[0]][zeroPos[1] + 1] in sublist for sublist in self.board):
-            options["R"] = [zeroPos[0], zeroPos[1] + 1]
-        if zeroPos[1] > 0 and any(self.board[zeroPos[0]][zeroPos[1] - 1] in sublist for sublist in self.board):
-            options["L"] = [zeroPos[0], zeroPos[1] - 1]
-        return options
 
     def checkLeft(self):
         zeroPos = self.findZero()
@@ -57,6 +41,18 @@ class Fifteen:
         if zeroPos[0] < 3 and any(self.board[zeroPos[0] + 1][zeroPos[1]] in sublist for sublist in self.board):
             return [zeroPos[0] + 1, zeroPos[1]]
 
+    def findOptions(self):
+        options = {"U": 0, "D": 0, "R": 0, "L": 0}
+        if self.checkUp() is not None:
+            options["U"] = self.checkUp()
+        if self.checkDown() is not None:
+            options["D"] = self.checkDown()
+        if self.checkRight() is not None:
+            options["R"] = self.checkRight()
+        if self.checkLeft() is not None:
+            options["L"] = self.checkLeft()
+        return options
+
     # def checkOrder(self):
     #     correct = [*range(1, 16), 0]
     #     wrongPos = []
@@ -71,6 +67,7 @@ class Fifteen:
             for j in range(len(self.board[i])):
                 if self.board[3][3] != 0 and self.board[i][j] != (i * 4 + j) + 1:
                     return False
+        return True
 
     def move(self, direction):
         zeroPos = self.findZero()
@@ -85,10 +82,16 @@ class Fifteen:
             self.swapPosition(previousPos, zeroPos)
 
     def printBoard(self):
-        for i in range(len(self.board)):
-            print(self.board[i])
+        print(self.board)
 
-    def bfs(self, search_order=0):
+    def bfs(self):
+        #defining search order
+        allowed_chars = {"L", "R", "D", "U"}
+        searchOrder = input("Define search order\n").upper()
+        while not set(searchOrder).issubset(allowed_chars):
+            print("Wrong!")
+            searchOrder = input("Define search order again\n").upper()
+
         zeroPos = self.findZero()
         queue = [[]]
         self.visited = [[False for i in range(len(self.board))] for j in range(len(self.board))]
@@ -110,21 +113,25 @@ class Fifteen:
         #                 print(queue)
 
         while not self.checkBoard():
+            options = self.findOptions()
             print(self.board)
-            if self.checkLeft() != 0:
-                if not self.visited[self.checkLeft()[0]][self.checkLeft()[1]]:
-                    self.move(self.checkLeft())
-            elif self.checkUp() != 0:
-                if not self.visited[self.checkUp()[0]][self.checkUp()[1]]:
-                    self.move(self.checkUp())
-            elif self.checkDown() != 0:
-                if not self.visited[self.checkDown()[0]][self.checkDown()[1]]:
-                    self.move(self.checkDown())
-            elif self.checkRight() != 0:
-                if not self.visited[self.checkRight()[0]][self.checkRight()[1]]:
-                    self.move(self.checkRight())
-            else:
-                break
+            for char in searchOrder:
+                if char == "L":
+                    if options["L"] != 0:
+                        if not self.visited[options["L"][0]][options["L"][1]]:
+                            self.move(options["L"])
+                elif char == "U":
+                    if options["U"] != 0:
+                        if not self.visited[options["U"][0]][options["U"][1]]:
+                            self.move(options["U"])
+                elif char == "D":
+                    if options["D"] != 0:
+                        if not self.visited[options["D"][0]][options["D"][1]]:
+                            self.move(options["D"])
+                elif char == "R":
+                    if options["R"] != 0:
+                        if not self.visited[options["R"][0]][options["R"][1]]:
+                            self.move(options["R"])
 
             print(self.board)
             print(self.visited)
