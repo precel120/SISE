@@ -10,10 +10,15 @@ class Fifteen:
                 temp[i] = file.readline().strip("\n")
                 temp[i] = list(ast.literal_eval(temp[i]))
                 self.board[i] = temp[i]
+                # defining search order
+        allowed_chars = {"L", "R", "D", "U"}
+        self.searchOrder = input("Define search order\n").upper()
+        while not set(self.searchOrder).issubset(allowed_chars):
+            print("Wrong!")
+            self.searchOrder = input("Define search order again\n").upper()
 
     def swapPosition(self, pos1, pos2):
-        self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][
-            pos1[1]]
+        self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][pos1[1]]
 
     def findZero(self):
         for i in range(len(self.board)):
@@ -65,76 +70,63 @@ class Fifteen:
     def checkBoard(self):
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
-                if self.board[3][3] != 0 and self.board[i][j] != (i * 4 + j) + 1:
+                if self.board[i][j] != (i * 4 + j) + 1 and self.board[3][3] != 0:
                     return False
         return True
 
     def move(self, direction):
         zeroPos = self.findZero()
-        previousPos = zeroPos
 
-        self.swapPosition(zeroPos, direction)
-        if self.checkBoard():
-            return True
-        else:
-            zeroPos = self.findZero()
-            self.visited[zeroPos[0]][zeroPos[1]] = True
-            self.swapPosition(previousPos, zeroPos)
+        # self.swapPosition(zeroPos, direction)
+        # if self.checkBoard():
+        #     return True
+        # else:
+        #     zeroPos = self.findZero()
+        #     self.visited[zeroPos[0]][zeroPos[1]] = True
+        #     self.swapPosition(previousPos, zeroPos)
+
+        options = self.findOptions()
+        for char in self.searchOrder:
+            if char == "L":
+                if options["L"] != 0:
+                    if not self.visited[options["L"][0]][options["L"][1]]:
+                        self.swapPosition(zeroPos, options["L"])
+                        zeroPos = self.findZero()
+                        self.visited[zeroPos[0]][zeroPos[1]] = True
+            elif char == "U":
+                if options["U"] != 0:
+                    if not self.visited[options["U"][0]][options["U"][1]]:
+                        self.swapPosition(zeroPos, options["U"])
+                        zeroPos = self.findZero()
+                        self.visited[zeroPos[0]][zeroPos[1]] = True
+            elif char == "D":
+                if options["D"] != 0:
+                    if not self.visited[options["D"][0]][options["D"][1]]:
+                        self.swapPosition(zeroPos, options["D"])
+                        zeroPos = self.findZero()
+                        self.visited[zeroPos[0]][zeroPos[1]] = True
+            elif char == "R":
+                if options["R"] != 0:
+                    if not self.visited[options["R"][0]][options["R"][1]]:
+                        self.swapPosition(zeroPos, options["R"])
+                        zeroPos = self.findZero()
+                        self.visited[zeroPos[0]][zeroPos[1]] = True
 
     def printBoard(self):
-        print(self.board)
+        for i in range(len(self.board)):
+            print(self.board[i])
 
     def bfs(self):
-        #defining search order
-        allowed_chars = {"L", "R", "D", "U"}
-        searchOrder = input("Define search order\n").upper()
-        while not set(searchOrder).issubset(allowed_chars):
-            print("Wrong!")
-            searchOrder = input("Define search order again\n").upper()
-
         zeroPos = self.findZero()
-        queue = [[]]
         self.visited = [[False for i in range(len(self.board))] for j in range(len(self.board))]
-
         self.visited[zeroPos[0]][zeroPos[1]] = True
-
-        # print(visited)
-        # queue.append(zeroPos)
-        #
-        # while queue:
-        #     s = queue.pop(0)
-        #
-        #     for i in range(len(self.board)):
-        #         for j in range(len(self.board[i])):
-        #             if not visited[i][j]:
-        #                 temp = [i, j]
-        #                 queue.append(temp)
-        #                 visited[i][j] = True
-        #                 print(queue)
+        i = 0
 
         while not self.checkBoard():
-            options = self.findOptions()
-            print(self.board)
-            for char in searchOrder:
-                if char == "L":
-                    if options["L"] != 0:
-                        if not self.visited[options["L"][0]][options["L"][1]]:
-                            self.move(options["L"])
-                elif char == "U":
-                    if options["U"] != 0:
-                        if not self.visited[options["U"][0]][options["U"][1]]:
-                            self.move(options["U"])
-                elif char == "D":
-                    if options["D"] != 0:
-                        if not self.visited[options["D"][0]][options["D"][1]]:
-                            self.move(options["D"])
-                elif char == "R":
-                    if options["R"] != 0:
-                        if not self.visited[options["R"][0]][options["R"][1]]:
-                            self.move(options["R"])
-
-            print(self.board)
-            print(self.visited)
+            print(i)
+            print(self.checkBoard())
+            self.move(self.searchOrder)
+            self.printBoard()
 
 
 fif = Fifteen()
