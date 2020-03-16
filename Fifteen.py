@@ -5,7 +5,7 @@ from collections import OrderedDict
 class Fifteen:
     def __init__(self):
         self.recursionLevel = 0
-        self.lastMove = 0
+        self.lastMove = ['']
         self.board = [[0 for x in range(4)] for y in range(4)]
         self.visited = [[False for i in range(len(self.board))] for j in range(len(self.board))]
         temp = [[0 for x in range(4)] for y in range(4)]
@@ -22,7 +22,8 @@ class Fifteen:
             self.searchOrder = input("Define search order again\n").upper()
 
     def swapPosition(self, pos1, pos2):
-        self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][pos1[1]]
+        self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][
+            pos1[1]]
 
     def findZero(self):
         for i in range(len(self.board)):
@@ -52,7 +53,7 @@ class Fifteen:
 
     def findOptions(self):
         temp = {self.searchOrder[0]: 0, self.searchOrder[1]: 0, self.searchOrder[2]: 0, self.searchOrder[3]: 0}
-        options  = OrderedDict(temp.items())
+        options = OrderedDict(temp.items())
         if self.checkUp() is not None:
             options["U"] = self.checkUp()
         if self.checkDown() is not None:
@@ -66,46 +67,66 @@ class Fifteen:
     def checkBoard(self):
         for i in range(len(self.board)):
             for j in range(len(self.board[i])):
-                if self.board[i][j] != (i * 4 + j) + 1 or self.board[3][3] != 0:
-                    return False
+                if self.board[i][j] != (i * 4 + j) + 1:
+                    if i != 3 or j != 3:
+                        return False
         return True
 
     def move(self, char):
         zeroPos = self.findZero()
         options = self.findOptions()
-
-        if char == "L" and self.lastMove != "R":
+        if char == "L":
             if options["L"] != 0:
-                if not self.visited[options["L"][0]][options["L"][1]]:
-                    self.swapPosition(zeroPos, options["L"])
-                    self.lastMove = "L"
-                    zeroPos = self.findZero()
-                    self.visited[zeroPos[0]][zeroPos[1]] = True
-                    self.recursionLevel += 1
-        elif char == "U" and self.lastMove != "D":
+                self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
+                self.lastMove.append("L")
+                self.recursionLevel += 1
+                return True
+            else:
+                return False
+        elif char == "U":
             if options["U"] != 0:
-                if not self.visited[options["U"][0]][options["U"][1]]:
-                    self.swapPosition(zeroPos, options["U"])
-                    self.lastMove = "U"
-                    zeroPos = self.findZero()
-                    self.visited[zeroPos[0]][zeroPos[1]] = True
-                    self.recursionLevel += 1
-        elif char == "D" and self.lastMove != "U":
+                self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
+                self.lastMove.append("U")
+                self.recursionLevel += 1
+                return True
+            else:
+                return False
+        elif char == "D":
             if options["D"] != 0:
-                if not self.visited[options["D"][0]][options["D"][1]]:
-                    self.swapPosition(zeroPos, options["D"])
-                    self.lastMove = "D"
-                    zeroPos = self.findZero()
-                    self.visited[zeroPos[0]][zeroPos[1]] = True
-                    self.recursionLevel += 1
-        elif char == "R" and self.lastMove != "L":
+                self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
+                self.lastMove.append("D")
+                self.recursionLevel += 1
+                return True
+            else:
+                return False
+        elif char == "R":
             if options["R"] != 0:
-                if not self.visited[options["R"][0]][options["R"][1]]:
-                    self.swapPosition(zeroPos, options["R"])
-                    self.lastMove = "R"
-                    zeroPos = self.findZero()
-                    self.visited[zeroPos[0]][zeroPos[1]] = True
-                    self.recursionLevel += 1
+                self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
+                self.lastMove.append("R")
+                self.recursionLevel += 1
+                return True
+            else:
+                return False
+
+    def moveBackwards(self):
+        zeroPos = self.findZero()
+
+        if self.lastMove[-1] == "L":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
+            return True
+        elif self.lastMove[-1] == "R":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
+            return True
+        elif self.lastMove[-1] == "U":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
+            return True
+        elif self.lastMove[-1] == "D":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
+            return True
 
     def printBoard(self):
         for i in range(len(self.board)):
@@ -113,18 +134,22 @@ class Fifteen:
         print()
 
     def bfs(self):
-        zeroPos = self.findZero()
-        self.visited[zeroPos[0]][zeroPos[1]] = True
-        i = 0
+        depth = 1
+        while not self.recursive_bfs(depth):
+            depth += 1
 
-        while not self.checkBoard():
-            print(i)
-            print(self.checkBoard())
-            for char in self.searchOrder:
-                self.move(char)
-                self.printBoard()
+    def recursive_bfs(self, depth):
+        if depth == 0:
+            return self.checkBoard()
+        for char in self.searchOrder:
+            if self.move(char):
+                if self.recursive_bfs(depth - 1):
+                    return True
+                else:
+                    self.moveBackwards()
+        return False
 
-    def dfs(self, maxDepth = 20):
+    def dfs(self, maxDepth=20):
         zeroPos = self.findZero()
         self.visited[zeroPos[0]][zeroPos[1]] = True
 
@@ -135,15 +160,17 @@ class Fifteen:
                 opt = self.findOptions()
                 print(self.lastMove)
                 while opt[char] != 0:
-                    if (self.lastMove == "U" and opt[char] == "D") or (self.lastMove == "L" and opt[char] == "R") or (self.lastMove == "R" and opt[char] == "L") or (self.lastMove == "D" and opt[char] == "U"):
+                    if (self.lastMove == "U" and opt[char] == "D") or (self.lastMove == "L" and opt[char] == "R") or (
+                            self.lastMove == "R" and opt[char] == "L") or (self.lastMove == "D" and opt[char] == "U"):
                         continue
                     self.move(char)
                     opt = self.findOptions()
                     self.printBoard()
         self.visited = [[False for i in range(len(self.board))] for j in range(len(self.board))]
         self.visited[self.findZero()[0]][self.findZero()[1]] = True
-                
+
 
 fif = Fifteen()
 fif.printBoard()
-fif.dfs()
+fif.bfs()
+fif.printBoard()
