@@ -195,7 +195,7 @@ class Fifteen:
                 opt = self.findOptions()
                 while opt[char] != 0 and levels[self.recursionLevel] != 4:
                     if self.checkBoard():
-                        return True
+                        break
                     levels[self.recursionLevel] += 1
                     if self.recursionLevel >= maxDepth:
                         self.moveBackwards()
