@@ -9,6 +9,7 @@ __pycache__/
 # Distribution / packaging
 .idea
 .vscode
+.pytest_cache
 .Python
 build/
 develop-eggs/
