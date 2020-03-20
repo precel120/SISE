@@ -44,37 +44,35 @@ class Fifteen:
                 if self.board[i][j] == 0:
                     return [i, j]
 
-    def checkLeft(self):
-        zeroPos = self.findZero()
+    def checkLeft(self, zeroPos):
         if zeroPos[1] > 0 and any(self.board[zeroPos[0]][zeroPos[1] - 1] in sublist for sublist in self.board):
             return [zeroPos[0], zeroPos[1] - 1]
 
-    def checkRight(self):
-        zeroPos = self.findZero()
+    def checkRight(self, zeroPos):
         if zeroPos[1] < 3 and any(self.board[zeroPos[0]][zeroPos[1] + 1] in sublist for sublist in self.board):
             return [zeroPos[0], zeroPos[1] + 1]
 
-    def checkUp(self):
-        zeroPos = self.findZero()
+    def checkUp(self, zeroPos):
         if zeroPos[0] > 0 and any(self.board[zeroPos[0] - 1][zeroPos[1]] in sublist for sublist in self.board):
             return [zeroPos[0] - 1, zeroPos[1]]
 
-    def checkDown(self):
-        zeroPos = self.findZero()
+    def checkDown(self, zeroPos):
         if zeroPos[0] < 3 and any(self.board[zeroPos[0] + 1][zeroPos[1]] in sublist for sublist in self.board):
             return [zeroPos[0] + 1, zeroPos[1]]
 
     def findOptions(self):
         temp = {self.searchOrder[0]: 0, self.searchOrder[1]: 0, self.searchOrder[2]: 0, self.searchOrder[3]: 0}
         options = OrderedDict(temp.items())
-        if self.checkUp() is not None:
-            options["U"] = self.checkUp()
-        if self.checkDown() is not None:
-            options["D"] = self.checkDown()
-        if self.checkRight() is not None:
-            options["R"] = self.checkRight()
-        if self.checkLeft() is not None:
-            options["L"] = self.checkLeft()
+        zeroPos = self.findZero()
+
+        if self.checkUp(zeroPos) is not None:
+            options["U"] = self.checkUp(zeroPos)
+        if self.checkDown(zeroPos) is not None:
+            options["D"] = self.checkDown(zeroPos)
+        if self.checkRight(zeroPos) is not None:
+            options["R"] = self.checkRight(zeroPos)
+        if self.checkLeft(zeroPos) is not None:
+            options["L"] = self.checkLeft(zeroPos)
         return options
 
     def checkBoard(self):
@@ -214,7 +212,23 @@ class Fifteen:
     def AStar(self):
         start = time.time()
         priorityQueue = PriorityQueue()
-        print(self.hamm())
+        zeroPos = self.findZero()
+        self.searchOrder = "LURD"
+        manhattanSum = self.manhSum()
+
+        while manhattanSum > 0:
+            options = self.findOptions()
+            for option in options:
+                if self.move(option):
+                    priorityQueue.put(self.manhSum())
+                    self.moveBackwards()
+            if priorityQueue.get() < manhattanSum:
+                
+            break
+
+        print(0)
+
+
         end = time.time()
         self.elapsed = end - start
         FileManager.saveStats(self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
@@ -222,7 +236,15 @@ class Fifteen:
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
-    
+
+    def manhSum(self):
+        manhatanSum = 0
+        for i in range(len(self.board)):
+            for j in range(len(self.board[i])):
+                if self.board[i][j] != 0:
+                    manhatanSum += self.manh([i, j], [(self.board[i][j] - 1) // 4, (self.board[i][j] - 1) % 4])
+        return manhatanSum
+
     def hamm(self):
         tilesWrong = 0
         for i in range(len(self.board)):
