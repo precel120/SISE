@@ -1,5 +1,5 @@
-def saveStats(algorithm, parameter, solutionLength, statesVisited, statesProcessed, maxAquiredLevel, elapsedTime):
-    with open(f'4x4_{algorithm}_{parameter}_stats.txt', 'w') as file:
+def saveStats(depth, ID, algorithm, parameter, solutionLength, statesVisited, statesProcessed, maxAquiredLevel, elapsedTime):
+    with open(f'4x4_{depth}_{ID}_{algorithm}_{parameter}_stats.txt', 'w') as file:
         file.seek(0)
         file.write(str(solutionLength))
         file.write("\n")
@@ -11,8 +11,8 @@ def saveStats(algorithm, parameter, solutionLength, statesVisited, statesProcess
         file.write("\n")
         file.write(str(elapsedTime))
 
-def saveBoard(algorithm, parameter, board):
-    with open(f'4x4_{algorithm}_{parameter}_.txt', 'w') as file:
+def saveBoard(depth, ID, algorithm, parameter, board):
+    with open(f'4x4_{depth}_{ID}_{algorithm}_{parameter}_.txt', 'w') as file:
         file.seek(0)
         for i in range(len(board)):
             file.write(str(board[i]).strip("[]"))

@@ -6,7 +6,7 @@ import FileManager
 
 
 class Fifteen:
-    def __init__(self, algorithm):
+    def __init__(self, algorithm, depth, ID):
         self.recursionLevel = 0
         self.solutionLength = 0
         self.statesVisited = 0
@@ -16,7 +16,8 @@ class Fifteen:
         self.lastMove = ['']
         self.board = [[0 for x in range(4)] for y in range(4)]
         temp = [[0 for x in range(4)] for y in range(4)]
-        with open('Układ początkowy.txt', 'r') as file:
+        with open(f'4x4_{depth}_{ID}.txt', 'r') as file:
+            #file.seek(1)
             for i in range(len(self.board)):
                 temp[i] = file.readline().strip("\n")
                 temp[i] = list(ast.literal_eval(temp[i]))
@@ -171,7 +172,7 @@ class Fifteen:
             depth += 1
         end = time.time()
         self.elapsed = end - start
-        FileManager.saveStats(self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
+        FileManager.saveStats(depth, id, self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
         FileManager.saveBoard(self.algorithm, self.searchOrder, self.board)
 
     def recursive_bfs(self, depth):
@@ -212,27 +213,27 @@ class Fifteen:
     def AStar(self):
         start = time.time()
         priorityQueue = PriorityQueue()
-        zeroPos = self.findZero()
         self.searchOrder = "LURD"
         manhattanSum = self.manhSum()
+        movementCost = 0
 
         while manhattanSum > 0:
+            if self.checkBoard():
+                break
             options = self.findOptions()
             for option in options:
                 if self.move(option):
-                    priorityQueue.put(self.manhSum())
+                    priorityQueue.put((self.manhSum(), option))
                     self.moveBackwards()
-            if priorityQueue.get() < manhattanSum:
-                
-            break
-
-        print(0)
-
+            temp = priorityQueue.get()
+            if temp[0] < manhattanSum:
+                manhattanSum = temp[0]
+                self.move(temp[1])
 
         end = time.time()
         self.elapsed = end - start
-        FileManager.saveStats(self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
-        FileManager.saveBoard(self.algorithm, self.heuristic, self.board)
+        # FileManager.saveStats(self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
+        # FileManager.saveBoard(self.algorithm, self.heuristic, self.board)
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -255,5 +256,5 @@ class Fifteen:
 
 
 algorithm = input("Choose alogithm BFS, DFS, A*\n").upper()
-fif = Fifteen(algorithm)
+fif = Fifteen(algorithm, "01", "00001")
 fif.printBoard()
