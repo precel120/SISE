@@ -214,21 +214,23 @@ class Fifteen:
         start = time.time()
         priorityQueue = PriorityQueue()
         self.searchOrder = "LURD"
-        manhattanSum = self.manhSum()
+        #manhattanSum = self.manhSum()
         movementCost = 0
 
-        while manhattanSum > 0:
-            if self.checkBoard():
-                break
+        self.printBoard()
+        while not self.checkBoard():
             options = self.findOptions()
             for option in options:
                 if self.move(option):
-                    priorityQueue.put((self.manhSum(), option))
+                    movementCost += 1
+                    priorityQueue.put((movementCost + self.manhSum(), option))
                     self.moveBackwards()
+                    movementCost -= 1
             temp = priorityQueue.get()
-            if temp[0] < manhattanSum:
-                manhattanSum = temp[0]
-                self.move(temp[1])
+            priorityQueue.queue.clear()
+            #manhattanSum = temp[0]
+            self.move(temp[1])
+            self.printBoard()
 
         end = time.time()
         self.elapsed = end - start
