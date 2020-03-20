@@ -1,4 +1,3 @@
-import ast
 from collections import OrderedDict
 import time
 from queue import PriorityQueue
@@ -6,7 +5,7 @@ import FileManager
 
 
 class Fifteen:
-    def __init__(self, algorithm, depth, ID):
+    def __init__(self, algorithm, fileName):
         self.recursionLevel = 0
         self.solutionLength = 0
         self.statesVisited = 0
@@ -15,13 +14,7 @@ class Fifteen:
         self.elapsedTime = 0
         self.lastMove = ['']
         self.board = [[0 for x in range(4)] for y in range(4)]
-        temp = [[0 for x in range(4)] for y in range(4)]
-        with open(f'4x4_{depth}_{ID}.txt', 'r') as file:
-            #file.seek(1)
-            for i in range(len(self.board)):
-                temp[i] = file.readline().strip("\n")
-                temp[i] = list(ast.literal_eval(temp[i]))
-                self.board[i] = temp[i]
+        FileManager.readBoard(fileName, self.board)
 
         self.algorithm = algorithm
         if self.algorithm == "BFS" or self.algorithm == "DFS":
@@ -172,8 +165,6 @@ class Fifteen:
             depth += 1
         end = time.time()
         self.elapsed = end - start
-        FileManager.saveStats(depth, id, self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
-        FileManager.saveBoard(self.algorithm, self.searchOrder, self.board)
 
     def recursive_bfs(self, depth):
         if depth == 0:
@@ -194,7 +185,7 @@ class Fifteen:
                 opt = self.findOptions()
                 while opt[char] != 0 and levels[self.recursionLevel] != 4:
                     if self.checkBoard():
-                        break
+                        return
                     levels[self.recursionLevel] += 1
                     if self.recursionLevel >= maxDepth:
                         self.moveBackwards()
@@ -207,35 +198,27 @@ class Fifteen:
                     self.moveBackwards()
         end = time.time()
         self.elapsed = end - start
-        FileManager.saveStats(self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
-        FileManager.saveBoard(self.algorithm, self.searchOrder, self.board)
         
     def AStar(self):
         start = time.time()
         priorityQueue = PriorityQueue()
         self.searchOrder = "LURD"
-        #manhattanSum = self.manhSum()
         movementCost = 0
 
-        self.printBoard()
         while not self.checkBoard():
             options = self.findOptions()
             for option in options:
                 if self.move(option):
                     movementCost += 1
-                    priorityQueue.put((movementCost + self.manhSum(), option))
+                    priorityQueue.put((movementCost + self.manhSum() if (self.heuristic == "manh") else self.hamm(), option))
                     self.moveBackwards()
                     movementCost -= 1
             temp = priorityQueue.get()
             priorityQueue.queue.clear()
-            #manhattanSum = temp[0]
             self.move(temp[1])
-            self.printBoard()
 
         end = time.time()
         self.elapsed = end - start
-        # FileManager.saveStats(self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.maxAquiredLevel)
-        # FileManager.saveBoard(self.algorithm, self.heuristic, self.board)
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -256,7 +239,15 @@ class Fifteen:
                     tilesWrong += 1
         return tilesWrong
 
+    def saveAll(self, solFileName, statsFileName):
+        if self.algorithm == "DFS" or self.algorithm == "BFS":
+            FileManager.saveStats(solFileName, self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
+            FileManager.saveBoard(statsFileName, self.algorithm, self.searchOrder, self.board)
+        else:
+            FileManager.saveStats(solFileName, self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
+            FileManager.saveBoard(statsFileName, self.algorithm, self.heuristic, self.board)
 
 algorithm = input("Choose alogithm BFS, DFS, A*\n").upper()
-fif = Fifteen(algorithm, "01", "00001")
+fif = Fifteen(algorithm, "4x4_01_00001.txt")
+fif.saveAll("4x4_01_0001_bfs_rdul_sol.txt", "4x4_01_0001_bfs_rdul_stats.txt")
 fif.printBoard()
