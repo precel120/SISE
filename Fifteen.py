@@ -14,6 +14,7 @@ class Fifteen:
         self.elapsedTime = 0.0
         self.lastMove = ['']
         self.allMoves = []
+        self.stopIterator = 0
         self.board = [[0 for x in range(4)] for y in range(4)]
         FileManager.readBoard(startFileName, self.board)
 
@@ -165,8 +166,14 @@ class Fifteen:
     def bfs(self):
         start = time.time()
         depth = 1
+
         while not self.recursive_bfs(depth):
+            if self.stopIterator >= 2000:
+                self.solutionLength = -1
+                break
             depth += 1
+            self.stopIterator += 1
+
         end = time.time()
         self.elapsedTime = (end - start) * 1000.0
 
@@ -184,7 +191,11 @@ class Fifteen:
     def dfs(self, maxDepth = 20):
         levels = [0 for x in range(maxDepth + 1)]
         start = time.time()
+        
         while not self.checkBoard():
+            if self.stopIterator >= 2000:
+                self.solutionLength = -1
+                break
             for char in self.searchOrder:
                 opt = self.findOptions()
                 while opt[char] != 0 and levels[self.recursionLevel] != 4:
@@ -200,6 +211,8 @@ class Fifteen:
                 if levels[self.recursionLevel] == 4:
                     levels[self.recursionLevel] = 0
                     self.moveBackwards()
+            self.stopIterator += 1
+
         end = time.time()
         self.elapsedTime = (end - start) * 1000.0
         
@@ -210,6 +223,9 @@ class Fifteen:
         movementCost = 0
 
         while not self.checkBoard():
+            if self.stopIterator >= 2000:
+                self.solutionLength = -1
+                break
             options = self.findOptions()
             for option in options:
                 if self.move(option):
@@ -220,6 +236,7 @@ class Fifteen:
             temp = priorityQueue.get()
             priorityQueue.queue.clear()
             self.move(temp[1])
+            self.stopIterator += 1
 
         end = time.time()
         self.elapsedTime = (end - start) * 1000.0
