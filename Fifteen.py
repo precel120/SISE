@@ -5,28 +5,30 @@ import FileManager
 
 
 class Fifteen:
-    def __init__(self, algorithm, fileName):
+    def __init__(self, algorithm, parameter, startFileName, solFileName, statsFileName):
         self.recursionLevel = 0
         self.solutionLength = 0
         self.statesVisited = 0
         self.statesProcessed = 0
         self.maxAquiredLevel = 0
-        self.elapsedTime = 0
+        self.elapsedTime = 0.0
         self.lastMove = ['']
+        self.allMoves = []
         self.board = [[0 for x in range(4)] for y in range(4)]
-        FileManager.readBoard(fileName, self.board)
+        FileManager.readBoard(startFileName, self.board)
 
         self.algorithm = algorithm
         if self.algorithm == "BFS" or self.algorithm == "DFS":
             # defining search order
-            self.searchOrder = input("Define search order\n").upper()
+            self.searchOrder = parameter.upper()
             if "BFS":
                 self.bfs()
             else:
                 self.dfs()
         else:
-            self.heuristic = input("Choose heurisitc hamm or manh\n").lower()
+            self.heuristic = parameter.lower()
             self.AStar()
+        self.saveAll(solFileName, statsFileName)
 
     def swapPosition(self, pos1, pos2):
         self.board[pos1[0]][pos1[1]], self.board[pos2[0]][pos2[1]] = self.board[pos2[0]][pos2[1]], self.board[pos1[0]][
@@ -85,8 +87,7 @@ class Fifteen:
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
                 self.lastMove.append("L")
                 self.recursionLevel += 1
-                self.solutionLength += 1
-                self.updateMaxAquiredLevel()
+                self.updateStats("L")
                 return True
             else:
                 return False
@@ -95,8 +96,7 @@ class Fifteen:
                 self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
                 self.lastMove.append("U")
                 self.recursionLevel += 1
-                self.solutionLength += 1
-                self.updateMaxAquiredLevel()
+                self.updateStats("U")
                 return True
             else:
                 return False
@@ -105,8 +105,7 @@ class Fifteen:
                 self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
                 self.lastMove.append("D")
                 self.recursionLevel += 1
-                self.solutionLength += 1
-                self.updateMaxAquiredLevel()
+                self.updateStats("D")
                 return True
             else:
                 return False
@@ -115,13 +114,14 @@ class Fifteen:
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
                 self.lastMove.append("R")
                 self.recursionLevel += 1
-                self.solutionLength +=1
-                self.updateMaxAquiredLevel()
+                self.updateStats("R")
                 return True
             else:
                 return False
     
-    def updateMaxAquiredLevel(self):
+    def updateStats(self, char):
+        self.solutionLength += 1
+        self.allMoves.append(char)
         if self.recursionLevel > self.maxAquiredLevel:
             self.maxAquiredLevel = self.recursionLevel
 
@@ -133,24 +133,28 @@ class Fifteen:
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
                 self.recursionLevel -= 1
                 self.solutionLength +=1
+                self.allMoves.append("L")
                 return True
             elif self.lastMove[-1] == "R":
                 self.lastMove.pop(-1)
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
                 self.recursionLevel -= 1
                 self.solutionLength +=1
+                self.allMoves.append("R")
                 return True
             elif self.lastMove[-1] == "U":
                 self.lastMove.pop(-1)
                 self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
                 self.recursionLevel -= 1
                 self.solutionLength +=1
+                self.allMoves.append("U")
                 return True
             elif self.lastMove[-1] == "D":
                 self.lastMove.pop(-1)
                 self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
                 self.recursionLevel -= 1
                 self.solutionLength +=1
+                self.allMoves.append("D")
                 return True
 
     def printBoard(self):
@@ -164,7 +168,7 @@ class Fifteen:
         while not self.recursive_bfs(depth):
             depth += 1
         end = time.time()
-        self.elapsed = end - start
+        self.elapsedTime = (end - start) * 1000.0
 
     def recursive_bfs(self, depth):
         if depth == 0:
@@ -197,7 +201,7 @@ class Fifteen:
                     levels[self.recursionLevel] = 0
                     self.moveBackwards()
         end = time.time()
-        self.elapsed = end - start
+        self.elapsedTime = (end - start) * 1000.0
         
     def AStar(self):
         start = time.time()
@@ -218,7 +222,7 @@ class Fifteen:
             self.move(temp[1])
 
         end = time.time()
-        self.elapsed = end - start
+        self.elapsedTime = (end - start) * 1000.0
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -241,13 +245,12 @@ class Fifteen:
 
     def saveAll(self, solFileName, statsFileName):
         if self.algorithm == "DFS" or self.algorithm == "BFS":
-            FileManager.saveStats(solFileName, self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
-            FileManager.saveBoard(statsFileName, self.algorithm, self.searchOrder, self.board)
+            FileManager.saveStats(statsFileName, self.algorithm, self.searchOrder, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
+            FileManager.saveSolution(solFileName, self.solutionLength, self.allMoves)
         else:
-            FileManager.saveStats(solFileName, self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
-            FileManager.saveBoard(statsFileName, self.algorithm, self.heuristic, self.board)
+            FileManager.saveStats(statsFileName, self.algorithm, self.heuristic, self.solutionLength, self.statesVisited, self.statesProcessed, self.maxAquiredLevel, self.elapsedTime)
+            FileManager.saveSolution(solFileName, self.solutionLength, self.allMoves)
 
-algorithm = input("Choose alogithm BFS, DFS, A*\n").upper()
-fif = Fifteen(algorithm, "4x4_01_00001.txt")
-fif.saveAll("4x4_01_0001_bfs_rdul_sol.txt", "4x4_01_0001_bfs_rdul_stats.txt")
+
+fif = Fifteen("bfs", "LURD", "4x4_01_00001.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
 fif.printBoard()
