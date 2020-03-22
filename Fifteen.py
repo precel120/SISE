@@ -3,13 +3,14 @@ import time
 from queue import PriorityQueue
 import FileManager
 
-
 class Fifteen:
     def __init__(self, algorithm, parameter, startFileName, solFileName, statsFileName):
+        self.maxAmount = 100000
         self.recursionLevel = 0
         self.solutionLength = 0
         self.statesVisited = 0
         self.statesProcessed = 0
+        self.statesList = []
         self.maxAquiredLevel = 0
         self.elapsedTime = 0.0
         self.lastMove = ['']
@@ -18,17 +19,22 @@ class Fifteen:
         self.board = [[0 for x in range(4)] for y in range(4)]
         FileManager.readBoard(startFileName, self.board)
 
-        self.algorithm = algorithm
+        self.algorithm = algorithm.upper()
         if self.algorithm == "BFS" or self.algorithm == "DFS":
             # defining search order
             self.searchOrder = parameter.upper()
-            if "BFS":
+            if self.algorithm == "BFS":
                 self.bfs()
             else:
                 self.dfs()
         else:
             self.heuristic = parameter.lower()
             self.AStar()
+
+        ############## Statistics ##################
+        self.statesVisited = self.statesList.__len__()
+        tempList = [' '.join([str(x) for x in lst]) for lst in self.statesList]
+        self.statesProcessed = tempList.__len__()
         self.saveAll(solFileName, statsFileName)
 
     def swapPosition(self, pos1, pos2):
@@ -168,7 +174,7 @@ class Fifteen:
         depth = 1
 
         while not self.recursive_bfs(depth):
-            if self.stopIterator >= 2000:
+            if self.stopIterator >= self.maxAmount:
                 self.solutionLength = -1
                 break
             depth += 1
@@ -182,6 +188,7 @@ class Fifteen:
             return self.checkBoard()
         for char in self.searchOrder:
             if self.move(char):
+                self.statesList.append(self.board)  # Statistic
                 if self.recursive_bfs(depth - 1):
                     return True
                 else:
@@ -191,22 +198,24 @@ class Fifteen:
     def dfs(self, maxDepth = 20):
         levels = [0 for x in range(maxDepth + 1)]
         start = time.time()
-        
+
         while not self.checkBoard():
-            if self.stopIterator >= 2000:
+            if self.stopIterator >= self.maxAmount:
                 self.solutionLength = -1
                 break
             for char in self.searchOrder:
                 opt = self.findOptions()
                 while opt[char] != 0 and levels[self.recursionLevel] != 4:
+                    self.printBoard()
                     if self.checkBoard():
-                        return
+                        break
                     levels[self.recursionLevel] += 1
                     if self.recursionLevel >= maxDepth:
                         self.moveBackwards()
                         break
                     if not self.move(char):
                         break
+                    self.statesList.append(self.board)  #Statistic
                     opt = self.findOptions()
                 if levels[self.recursionLevel] == 4:
                     levels[self.recursionLevel] = 0
@@ -215,7 +224,7 @@ class Fifteen:
 
         end = time.time()
         self.elapsedTime = (end - start) * 1000.0
-        
+
     def AStar(self):
         start = time.time()
         priorityQueue = PriorityQueue()
@@ -223,7 +232,7 @@ class Fifteen:
         movementCost = 0
 
         while not self.checkBoard():
-            if self.stopIterator >= 2000:
+            if self.stopIterator >= self.maxAmount:
                 self.solutionLength = -1
                 break
             options = self.findOptions()
@@ -236,6 +245,7 @@ class Fifteen:
             temp = priorityQueue.get()
             priorityQueue.queue.clear()
             self.move(temp[1])
+            self.statesList.append(self.board)  # Statistic
             self.stopIterator += 1
 
         end = time.time()
@@ -269,5 +279,5 @@ class Fifteen:
             FileManager.saveSolution(solFileName, self.solutionLength, self.allMoves)
 
 
-fif = Fifteen("bfs", "LURD", "4x4_01_00001.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
+fif = Fifteen("dfs", "LUDR", "4x4_01_00001.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
 fif.printBoard()
