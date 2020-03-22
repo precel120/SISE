@@ -2,6 +2,8 @@ from collections import OrderedDict
 import time
 from queue import PriorityQueue
 import FileManager
+from copy import deepcopy
+import sys
 
 class Fifteen:
     def __init__(self, algorithm, parameter, startFileName, solFileName, statsFileName):
@@ -15,7 +17,6 @@ class Fifteen:
         self.elapsedTime = 0.0
         self.lastMove = ['']
         self.allMoves = []
-        self.stopIterator = 0
         self.board = [[0 for x in range(4)] for y in range(4)]
         FileManager.readBoard(startFileName, self.board)
 
@@ -24,17 +25,25 @@ class Fifteen:
             # defining search order
             self.searchOrder = parameter.upper()
             if self.algorithm == "BFS":
+                start = time.time()
                 self.bfs()
+                end = time.time()
             else:
-                self.dfs()
+                start = time.time()
+                self.dfs(int(startFileName[5]))
+                end = time.time()
         else:
             self.heuristic = parameter.lower()
+            start = time.time()
             self.AStar()
+            end = time.time()
+        self.elapsedTime = (end - start) * 1000.0
+
 
         ############## Statistics ##################
         self.statesVisited = self.statesList.__len__()
         tempList = [' '.join([str(x) for x in lst]) for lst in self.statesList]
-        self.statesProcessed = tempList.__len__()
+        self.statesProcessed = list(OrderedDict.fromkeys(tempList)).__len__()
         self.saveAll(solFileName, statsFileName)
 
     def swapPosition(self, pos1, pos2):
@@ -169,26 +178,20 @@ class Fifteen:
             print(self.board[i])
         print()
 
+    def addState(self):
+        self.statesList.append(deepcopy(self.board))
+
     def bfs(self):
-        start = time.time()
         depth = 1
-
         while not self.recursive_bfs(depth):
-            if self.stopIterator >= self.maxAmount:
-                self.solutionLength = -1
-                break
             depth += 1
-            self.stopIterator += 1
-
-        end = time.time()
-        self.elapsedTime = (end - start) * 1000.0
 
     def recursive_bfs(self, depth):
         if depth == 0:
             return self.checkBoard()
         for char in self.searchOrder:
             if self.move(char):
-                self.statesList.append(self.board)  # Statistic
+                self.addState() # Statistic
                 if self.recursive_bfs(depth - 1):
                     return True
                 else:
@@ -197,44 +200,36 @@ class Fifteen:
 
     def dfs(self, maxDepth = 20):
         levels = [0 for x in range(maxDepth + 1)]
-        start = time.time()
+        solved = False
 
-        while not self.checkBoard():
-            if self.stopIterator >= self.maxAmount:
-                self.solutionLength = -1
-                break
+        while not solved:
             for char in self.searchOrder:
                 opt = self.findOptions()
                 while opt[char] != 0 and levels[self.recursionLevel] != 4:
-                    self.printBoard()
                     if self.checkBoard():
-                        break
+                        solved = True
                     levels[self.recursionLevel] += 1
                     if self.recursionLevel >= maxDepth:
                         self.moveBackwards()
                         break
                     if not self.move(char):
                         break
-                    self.statesList.append(self.board)  #Statistic
+                    self.addState() # Statistic
                     opt = self.findOptions()
                 if levels[self.recursionLevel] == 4:
                     levels[self.recursionLevel] = 0
                     self.moveBackwards()
-            self.stopIterator += 1
-
-        end = time.time()
-        self.elapsedTime = (end - start) * 1000.0
 
     def AStar(self):
-        start = time.time()
+        stopIterator = 0
         priorityQueue = PriorityQueue()
         self.searchOrder = "LURD"
         movementCost = 0
 
         while not self.checkBoard():
-            if self.stopIterator >= self.maxAmount:
+            if stopIterator >= self.maxAmount:
                 self.solutionLength = -1
-                break
+                return
             options = self.findOptions()
             for option in options:
                 if self.move(option):
@@ -245,11 +240,8 @@ class Fifteen:
             temp = priorityQueue.get()
             priorityQueue.queue.clear()
             self.move(temp[1])
-            self.statesList.append(self.board)  # Statistic
-            self.stopIterator += 1
-
-        end = time.time()
-        self.elapsedTime = (end - start) * 1000.0
+            self.addState()  # Statistic
+            stopIterator += 1
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -279,5 +271,5 @@ class Fifteen:
             FileManager.saveSolution(solFileName, self.solutionLength, self.allMoves)
 
 
-fif = Fifteen("dfs", "LUDR", "4x4_01_00001.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
-fif.printBoard()
+fif = Fifteen("dfs", "URDL", "4x4_06_00013.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
+#fif = Fifteen(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
