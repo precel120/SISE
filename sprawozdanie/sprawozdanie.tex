@@ -37,24 +37,26 @@ Poszukiwanie rozwiązania łamigłówki jest zbliżone do znajdowania ścieżki 
 W celu odnalezienie właściwej ścieżki stostujemy następujące strategie:\\
 \begin{itemize}
 	\item BFS - Breadth First Search - przeszukiwanie "wszerz" rozpoczynając od zadanego wierzchołka w grafie, odwiedza wszystkie osiągalne z niego wierzchołki na tym samym poziomie rekursji, według ustalonej wcześniej kolejności sprawdzania. Następnie odwiedza wszystkie osiągalne wierzchołki pochodne, na kolejnym poziomie rekursji
-	\item DFS - Depth First Search - przeszukiwanie "w głąb" rozpoczyna przechodzenie grafu od zadanego wierzchołka, odwiedzając pierwszy z pochodnych wierzchołków, kolejność przechodzenia jest wcześniej ustalana, powtarzając to dla każdego pochodnego wierzchołka. Jeżeli algorytm nie będzie mógł wchodzić dalej (osiągnie zadaną maksymalną głębokość rekursji), cofa się o jeden poziom rekursji i bada krawędź kolejnego nieodwiedzonego jeszcze wierzchołka.
+	\item DFS - Depth First Search - przeszukiwanie "w głąb" rozpoczyna przechodzenie grafu od zadanego wierzchołka, odwiedzając pierwszy z pochodnych wierzchołków, kolejność przechodzenia jest wcześniej ustalana, powtarzając to dla każdego pochodnego wierzchołka. Jeżeli algorytm nie będzie mógł wchodzić dalej (osiągnie zadaną maksymalną głębokość rekursji lub już dalej nie będzie mógł wykonać ruchu), cofa się o jeden poziom rekursji i bada krawędź kolejnego nieodwiedzonego jeszcze wierzchołka.
 	\item A* - Algorytm heurystyczny znajduje najkrótsza mozliwą ścieżkę, jeśli taka istnieje. W przypadku piętnastki algorytm A* tworzy ścieżkę wybierając wierzchołek tak, aby minimalizować wartość heurestyki. Metody obliczania tej wartości to: metoda Hammminga, gdzie obliczamy ile klocków znajduje się na niewłaściwych pozycjach, metoda Manhattan, gdzie liczymy jakie odległości dzielą klocki od ich docelowych miejsc.
 \end{itemize}
 }
 
 \section{Opis implementacji}
 {
-Program został napisany w języku Python. Klasa Fifteen jest klasą główną natomiast plik FileManager.py odpowiadaja za wczytywanie układanki, zapis statystyk oraz zapis ułożonej układanki. W klasie Fifteen znajdują się wszystkie strategie oraz niezbędne operacje na układance, np. odnaleznie pozycji pustej, zamiana elementów, przedstawienie możliwych ruchów.
+Program został napisany w języku Python. Klasa Fifteen jest klasą główną natomiast plik FileManager.py odpowiadaja za wczytywanie układanki, zapis statystyk oraz zapis ułożonej układanki. W klasie Fifteen znajdują się wszystkie strategie oraz niezbędne operacje na układance, np. odnaleznie pozycji pustej, zamiana elementów, przedstawienie możliwych ruchów. Konstruktor klasy Fifteen został tak przystosowany by pobierał parametry z PowerShella, przekazywane przez uruchamiacz, udostępniony na platformie Wikamp.
+}
+
+\section{Materiały i metody}
+{
 
 Algorytm BFS został napisany metodą rekurencyjną, gdzie na początek jest ustalana obecna głębokość równa 1, a następnie program próbuje ruszyć się w kierunku podyktowanym z góry.
 Jeśli mu się powiedzie, to metoda rekurencyjna wywołuje się ponownie, tym razem z wartością obecnej głębokości mniejszą o 1. Jeśli na najmniejszej głębokości równej 0 układanka będzie ukończona, program przestaje się wykonywać. W przeciwnym wypadku jest zwracany fałsz, po którym na poziomie wyższym wykonywany jest ruch w tył. Jeśli po wykonaniu każdego z dostępnych ruchów piętnastka nie będzie ułożona, to zwiększany jest poziom głębokości i program wykonuje się ponownie, do skutku.
 
 Algorytm DFS został napisany metodą iteracyjną, gdzie każdy poziom rekursji, którego górną granicę ustawiliśmy na 20, przechowuje informację o ilości przebytych na nim możliwości. Na każdy poziom możliwe jest wykonanie maksymalnie 4 ruchów, w zależności od pozycji pustego elementu. Program schodzi na najniższy poziom uwzględniając wcześniej zadaną mu kolejność, a następnie przeszukuje tam wszystkie możliwości, sprawdzając czy układanka została ukończona. W przypadku niepowodzenia cofa się i przeszukuje kolejne odnogi poziomu na który się cofnął, do czasu aż wszystkie możliwe ruchy na danym poziomie zostaną wyczerpane.
 
-Algorytm A* działa na zasadzie kolejki, z której wyłuskiwany jest element o najniższej wartości. Na początku program, w zależności od wybranej heurystyki oblicza który z możliwych do wykonania ruchów jest najbardziej korzystny. W przypadku Metryki Hamminga, jest to suma elementów znajdujących się na nie swoich miejscach. Im suma jest mniejsza, tym bliżej do udanego wykonania. Zasada działania Metryki Manhattan jest bardzo podobna, również jest to suma, ale odległości każdego punktu, od jego docelowej pozycji. W przypadku gdy suma będzie równa 0, program zakończy działanie z sukcesem.}
+Algorytm A* działa na zasadzie kolejki, z której wyłuskiwany jest element o najniższej wartości. Na początku program, w zależności od wybranej heurystyki oblicza który z możliwych do wykonania ruchów jest najbardziej korzystny. W przypadku Metryki Hamminga, jest to suma elementów znajdujących się na nie swoich miejscach. Im suma jest mniejsza, tym bliżej do udanego wykonania. Zasada działania Metryki Manhattan jest bardzo podobna, również jest to suma, ale odległości każdego punktu, od jego docelowej pozycji. W przypadku gdy suma będzie równa 0, program zakończy działanie z sukcesem.
 
-\section{Materiały i metody}
-{
 Badanie zostało przeprowadzone przy pomocy skryptu uruchamianego w Windows PowerShell. Skrypt pobierał jako argumenty rodzaj algorytmu, a także kolejność wykonywania ruchów.
 Następnie jego zadaniem było odczytanie wszystkich, wcześniej wygenerowanych plików .txt z początkowym układem piętnastki. Plik FileManager.py odpowiedzialny był w naszym programie za utworzenie odpowiednich plików ze statystykami danego przebiegu programu. Na koniec wszystkie osobno utworzone pliki przetworzone zostały za pomocą osobnego skryptu PowerShell'owego, a następnie zaimportowane do programu Microsoft Excel w celu dokonania analizy danych.
 }
@@ -429,25 +431,33 @@ Następnie jego zadaniem było odczytanie wszystkich, wcześniej wygenerowanych 
 
 \section{Dyskusja}
 {
-Sekcja ta powinna zawierać dokładną interpretację uzyskanych wyników
-eksperymentów wraz ze szczegółowymi wnioskami z nich płynącymi. Najcenniejsze
-są, rzecz jasna, wnioski o charakterze uniwersalnym, które mogą być istotne
-przy innych, podobnych zadaniach. Należy również omówić i wyjaśnić wszystkie
-napotkane problemy (jeśli takie były). Każdy wniosek powinien mieć poparcie we
-wcześniej przeprowadzonych eksperymentach (odwołania do konkretnych wyników).
-Jest to jedna z najważniejszych sekcji tego sprawozdania, gdyż prezentuje
-poziom zrozumienia badanego problemu.}
+	Dla algorytmu BFS średnia ilość rozwiązań, przy niższych głębokościach jest mniejsza od A*, lecz przy wyższych to A* charakteryzuje się mniejszą ilością rozwiązań. 
+Przykładowo maksymalna średnia ilość rozwiązań dla głebokości 7 dla algorytmu BFS jest to 1616,368 z kolei dla A* jest to zaledwie 42,406.
+ \\	Ma to również wpływ na liczbę stanów odwiedzonych i przetworzonych, A* ma ich mniej od BFS, szczególne rozbieżności możemy zaobserwować dla głębokości od 2 do 4. W A* wartości rośną o 1 gdzie w BFS maksymalna rożnica między głębokościami wynosi 30, przy większych głębokościach liczba stanów dla tych algorytmów jest stosunkowo podobna.
+\\ 	Maksymalna osiągnięta głębkokość rekursji dla BFS rośnie stale o 1 dla kolejnych głębokości, dla A*, dzieje się podobnie tylko na początku, ponieważ od głębokości 5 te wartości rosną o większa ilość, przy głębokości 7 dla metryki hamminga wynosi ona aż 1773,250.
+\\	Czasy wykonywania dla mniejszych głębokości są mniejsze w A*, jednak dla wyższych to BFS ma mniejsze wartości, przy 7 głębokości metryka Hamminga średnio przechodziła przez 340ms, a BFS przechodził przez średnio 50ms. Dla algorytmu A* wpływ miało również dobór heurystyki, metryka Hamminga potrafiła wykonywać się ponad 2 razy dłużej niż metryka Manhattana. Czas wykonywania algorytmu DFS jest znacznie dłuższy od pozostałych algorytmów, czyni go to bardzo niewygodnym algorytmem do odpowiedniego badania. Dodatkowy wpływ na czas wykonywania obliczeń mają różne czynniki takie jak, programy pracujące w tle,
+sposób przydzielania zasobów, czy też sama moc obliczeniowa naszego sprzętu.
+}
 
 \section{Wnioski}
 {
-W tej, przedostatniej, sekcji należy zamieścić podsumowanie najważniejszych
-wniosków z sekcji poprzedniej. Najlepiej jest je po prostu wypunktować. Znów,
-tak jak poprzednio, najistotniejsze są wnioski o charakterze uniwersalnym.}
+\begin{itemize}
+	\item Do jak najszybszego ułożenia układanki najlepiej użyć algorytmu BFS lub A*, ponieważ oboje charakteryzują się szybkim czasem wykonywania. Czas obliczeń algorytmu DFS jest zbyt długi by warto było go do tego zastosować.
+	\item Heurystyka Manhattana nadaje się do bardziej złożonych układanek. Do prostszych nie ma to większego znaczenia.
+	\item DFS charakteryzuje się zbyt dużą przypadkowością w znajdowaniu najkrótszego rozwiązania i pochłania zbyt dużo zasobów programowych. Ogromną ważność ma również dobranie odpowiedniego sposobu w jaki algorytm ma przeszukiwać układankę.
+\end{itemize}
+}
 
 \begin{thebibliography}{0}
   \bibitem{l2short} T. Oetiker, H. Partl, I. Hyna, E. Schlegl.
     \textsl{Nie za krótkie wprowadzenie do systemu \LaTeX2e}, 2007, dostępny
     online.
+ \bibitem{eduinf} mgr Jerzy Wałaszek
+	\textsl{\url{https://eduinf.waw.pl/inf/alg/001_search/0125.php}}
+\bibitem{algoa} Joanna Raczyńska
+	\textsl{Algorytm A* \url{https://elektron.elka.pw.edu.pl/~jarabas/ALHE/notatki3.pdf}}
+\bibitem{bfs} Michał Karpiński
+	\textsl{\url{http://informatyka.wroc.pl/node/709}}
 \end{thebibliography}
 
 \end{document}
