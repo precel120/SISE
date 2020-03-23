@@ -7,7 +7,7 @@ import sys
 
 class Fifteen:
     def __init__(self, algorithm, parameter, startFileName, solFileName, statsFileName):
-        self.maxAmount = 100000
+        self.maxTime = 1
         self.recursionLevel = 0
         self.solutionLength = 0
         self.statesVisited = 0
@@ -30,7 +30,7 @@ class Fifteen:
                 end = time.time()
             else:
                 start = time.time()
-                self.dfs(int(startFileName[5]))
+                self.dfs()
                 end = time.time()
         else:
             self.heuristic = parameter.lower()
@@ -44,6 +44,8 @@ class Fifteen:
         self.statesVisited = self.statesList.__len__()
         tempList = [' '.join([str(x) for x in lst]) for lst in self.statesList]
         self.statesProcessed = list(OrderedDict.fromkeys(tempList)).__len__()
+        if self.solutionLength != -1:
+            self.solutionLength = len(self.allMoves)
         self.saveAll(solFileName, statsFileName)
 
     def swapPosition(self, pos1, pos2):
@@ -99,7 +101,7 @@ class Fifteen:
         zeroPos = self.findZero()
         options = self.findOptions()
         if char == "L":
-            if options["L"] != 0 and self.lastMove[-1] != "R":
+            if options["L"] != 0:
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
                 self.lastMove.append("L")
                 self.recursionLevel += 1
@@ -108,7 +110,7 @@ class Fifteen:
             else:
                 return False
         elif char == "U":
-            if options["U"] != 0 and self.lastMove[-1] != "D":
+            if options["U"] != 0:
                 self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
                 self.lastMove.append("U")
                 self.recursionLevel += 1
@@ -117,7 +119,7 @@ class Fifteen:
             else:
                 return False
         elif char == "D":
-            if options["D"] != 0 and self.lastMove[-1] != "U":
+            if options["D"] != 0:
                 self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
                 self.lastMove.append("D")
                 self.recursionLevel += 1
@@ -126,7 +128,7 @@ class Fifteen:
             else:
                 return False
         elif char == "R":
-            if options["R"] != 0 and self.lastMove[-1] != "L":
+            if options["R"] != 0:
                 self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
                 self.lastMove.append("R")
                 self.recursionLevel += 1
@@ -136,42 +138,36 @@ class Fifteen:
                 return False
     
     def updateStats(self, char):
-        self.solutionLength += 1
         self.allMoves.append(char)
         if self.recursionLevel > self.maxAquiredLevel:
             self.maxAquiredLevel = self.recursionLevel
 
-    def moveBackwards(self, howMany = 1):
+    def moveBackwards(self):
         zeroPos = self.findZero()
-        for counter in range(howMany):
-            if self.lastMove[-1] == "L":
-                self.lastMove.pop(-1)
-                self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
-                self.recursionLevel -= 1
-                self.solutionLength +=1
-                self.allMoves.append("L")
-                return True
-            elif self.lastMove[-1] == "R":
-                self.lastMove.pop(-1)
-                self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
-                self.recursionLevel -= 1
-                self.solutionLength +=1
-                self.allMoves.append("R")
-                return True
-            elif self.lastMove[-1] == "U":
-                self.lastMove.pop(-1)
-                self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
-                self.recursionLevel -= 1
-                self.solutionLength +=1
-                self.allMoves.append("U")
-                return True
-            elif self.lastMove[-1] == "D":
-                self.lastMove.pop(-1)
-                self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
-                self.recursionLevel -= 1
-                self.solutionLength +=1
-                self.allMoves.append("D")
-                return True
+        if self.lastMove[-1] == "L":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] + 1])
+            self.recursionLevel -= 1
+            self.allMoves.append("L")
+            return True
+        elif self.lastMove[-1] == "R":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0], zeroPos[1] - 1])
+            self.recursionLevel -= 1
+            self.allMoves.append("R")
+            return True
+        elif self.lastMove[-1] == "U":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0] + 1, zeroPos[1]])
+            self.recursionLevel -= 1
+            self.allMoves.append("U")
+            return True
+        elif self.lastMove[-1] == "D":
+            self.lastMove.pop(-1)
+            self.swapPosition(zeroPos, [zeroPos[0] - 1, zeroPos[1]])
+            self.recursionLevel -= 1
+            self.allMoves.append("D")
+            return True
 
     def printBoard(self):
         for i in range(len(self.board)):
@@ -201,33 +197,30 @@ class Fifteen:
     def dfs(self, maxDepth = 20):
         levels = [0 for x in range(maxDepth + 1)]
         solved = False
-
         while not solved:
-            for char in self.searchOrder:
-                opt = self.findOptions()
-                while opt[char] != 0 and levels[self.recursionLevel] != 4:
-                    if self.checkBoard():
-                        solved = True
-                    levels[self.recursionLevel] += 1
-                    if self.recursionLevel >= maxDepth:
-                        self.moveBackwards()
-                        break
-                    if not self.move(char):
-                        break
-                    self.addState() # Statistic
-                    opt = self.findOptions()
-                if levels[self.recursionLevel] == 4:
+            if self.recursionLevel < maxDepth:
+                if levels[self.recursionLevel] < 4:
+                    if self.move(self.searchOrder[levels[self.recursionLevel]]):
+                        solved = self.checkBoard()
+                        self.addState() # Statistic
+                        levels[self.recursionLevel - 1] += 1
+                    else:
+                        levels[self.recursionLevel] += 1
+                else:
                     levels[self.recursionLevel] = 0
                     self.moveBackwards()
+            else:
+                self.moveBackwards()
 
     def AStar(self):
-        stopIterator = 0
         priorityQueue = PriorityQueue()
         self.searchOrder = "LURD"
         movementCost = 0
+        start = time.time()
+        end = 0
 
         while not self.checkBoard():
-            if stopIterator >= self.maxAmount:
+            if end - start > self.maxTime:
                 self.solutionLength = -1
                 return
             options = self.findOptions()
@@ -241,7 +234,7 @@ class Fifteen:
             priorityQueue.queue.clear()
             self.move(temp[1])
             self.addState()  # Statistic
-            stopIterator += 1
+            end = time.time()
 
     def manh(self, a, b):
         return abs(a[0] - b[0]) + abs(a[1] - b[1])
@@ -271,5 +264,5 @@ class Fifteen:
             FileManager.saveSolution(solFileName, self.solutionLength, self.allMoves)
 
 
-fif = Fifteen("dfs", "URDL", "4x4_06_00013.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
-#fif = Fifteen(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
+#fif = Fifteen("dfs", "LRDU", "4x4_06_00013.txt", "4x4_01_00001_bfs_rdul_sol.txt", "4x4_01_00001_bfs_rdul_stats.txt")
+fif = Fifteen(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4], sys.argv[5])
