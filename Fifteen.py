@@ -187,7 +187,7 @@ class Fifteen:
             return self.checkBoard()
         for char in self.searchOrder:
             if self.move(char):
-                self.addState() # Statistic
+                self.addState()  # Statistic
                 if self.recursive_bfs(depth - 1):
                     return True
                 else:

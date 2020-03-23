@@ -16,7 +16,7 @@
 
 \author{
   \studentinfo{Maciej Pracucik}{216869} \and
-  \studentinfo{Adam Jóźwiak}{2167862}
+  \studentinfo{Adam Jóźwiak}{216786}
 }
 
 \title{\textbf{Zadanie 1: Piętnastka}}
@@ -44,18 +44,20 @@ W celu odnalezienie właściwej ścieżki stostujemy następujące strategie:\\
 
 \section{Opis implementacji}
 {
-Program został napisany w języku Python. Klasa Fifteen jest klasą główną natomiast plik FileManager.py odpowiadaja za wczytywanie układanki, zapis statystyk oraz zapis ułożonej układanki. W klasie Fifteen znajdują się wszystkie strategie oraz niezbędne operacje na układance, np. odnaleznie pozycji pustej, zamiana elementów, przedstawienie możliwych ruchów.}
+Program został napisany w języku Python. Klasa Fifteen jest klasą główną natomiast plik FileManager.py odpowiadaja za wczytywanie układanki, zapis statystyk oraz zapis ułożonej układanki. W klasie Fifteen znajdują się wszystkie strategie oraz niezbędne operacje na układance, np. odnaleznie pozycji pustej, zamiana elementów, przedstawienie możliwych ruchów.
+
+Algorytm BFS został napisany metodą rekurencyjną, gdzie na początek jest ustalana obecna głębokość równa 1, a następnie program próbuje ruszyć się w kierunku podyktowanym z góry.
+Jeśli mu się powiedzie, to metoda rekurencyjna wywołuje się ponownie, tym razem z wartością obecnej głębokości mniejszą o 1. Jeśli na najmniejszej głębokości równej 0 układanka będzie ukończona, program przestaje się wykonywać. W przeciwnym wypadku jest zwracany fałsz, po którym na poziomie wyższym wykonywany jest ruch w tył. Jeśli po wykonaniu każdego z dostępnych ruchów piętnastka nie będzie ułożona, to zwiększany jest poziom głębokości i program wykonuje się ponownie, do skutku.
+
+Algorytm DFS został napisany metodą iteracyjną, gdzie każdy poziom rekursji, którego górną granicę ustawiliśmy na 20, przechowuje informację o ilości przebytych na nim możliwości. Na każdy poziom możliwe jest wykonanie maksymalnie 4 ruchów, w zależności od pozycji pustego elementu. Program schodzi na najniższy poziom uwzględniając wcześniej zadaną mu kolejność, a następnie przeszukuje tam wszystkie możliwości, sprawdzając czy układanka została ukończona. W przypadku niepowodzenia cofa się i przeszukuje kolejne odnogi poziomu na który się cofnął, do czasu aż wszystkie możliwe ruchy na danym poziomie zostaną wyczerpane.
+
+Algorytm A* działa na zasadzie kolejki, z której wyłuskiwany jest element o najniższej wartości. Na początku program, w zależności od wybranej heurystyki oblicza który z możliwych do wykonania ruchów jest najbardziej korzystny. W przypadku Metryki Hamminga, jest to suma elementów znajdujących się na nie swoich miejscach. Im suma jest mniejsza, tym bliżej do udanego wykonania. Zasada działania Metryki Manhattan jest bardzo podobna, również jest to suma, ale odległości każdego punktu, od jego docelowej pozycji. W przypadku gdy suma będzie równa 0, program zakończy działanie z sukcesem.}
 
 \section{Materiały i metody}
 {
-W tym miejscu należy opisać, jak przeprowadzone zostały wszystkie badania,
-których wyniki i dyskusja zamieszczane są w dalszych sekcjach. Opis ten
-powinien być na tyle dokładny, aby osoba czytająca go potrafiła wszystkie
-przeprowadzone badania samodzielnie powtórzyć w celu zweryfikowania ich
-poprawności. Przy opisie należy odwoływać się i stosować do
-opisanych w sekcji drugiej wzorów i oznaczeń, a także w jasny sposób opisać
-cel konkretnego testu. Najlepiej byłoby wyraźnie wyszczególnić (ponumerować)
-poszczególne eksperymenty tak, aby łatwo było się do nich odwoływać dalej.}
+Badanie zostało przeprowadzone przy pomocy skryptu uruchamianego w Windows PowerShell. Skrypt pobierał jako argumenty rodzaj algorytmu, a także kolejność wykonywania ruchów.
+Następnie jego zadaniem było odczytanie wszystkich, wcześniej wygenerowanych plików .txt z początkowym układem piętnastki. Plik FileManager.py odpowiedzialny był w naszym programie za utworzenie odpowiednich plików ze statystykami danego przebiegu programu. Na koniec wszystkie osobno utworzone pliki przetworzone zostały za pomocą osobnego skryptu PowerShell'owego, a następnie zaimportowane do programu Microsoft Excel w celu dokonania analizy danych.
+}
 
 \section{Wyniki}
 {
@@ -64,13 +66,365 @@ poszczególne eksperymenty tak, aby łatwo było się do nich odwoływać dalej.
 \end{center}
 \subsection{DRUL}
 \begin{center}
-	\begin{tabular}{ | c | c | c | c | c | c | }
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
 	\hline
-	\multicolumn{6}{|c|}{DRUL} \\
+	\multicolumn{6}{|c|}{BFS Uśrednione - DRUL} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1 & 1,000 & 1,000 & 1,000 & 1,000 & 0,000 \\
+	\hline
+	2 & 10,500 & 6,250 & 5,000 & 2,000& 0,250 \\
+	\hline
+	3 & 41,400&	22,200& 14,900& 3,000 & 1,402 \\
+	\hline
+	4 & 115,583 & 59,792 & 36,083 & 4,000 & 4,044 \\
+	\hline
+	5 & 283,074 & 144,037 &	82,278 & 5,000 & 9,490 \\
+	\hline
+	6 & 693,738 & 349,869 & 191,776 & 6,000 &22,824 \\
+	\hline
+	7 & 1616,368 & 811,684 & 430,259 & 7,000& 52,164 \\
 	\hline
 	\end{tabular}
 \end{center}
 
+\subsubsection{RDUL}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - RDUL} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1 & 1,000 & 1,000 & 1,000 & 1,000 & 0,000 \\
+	\hline
+	2 & 10,500 & 6,250 & 5,000 & 2,000& 0,250 \\
+	\hline
+	3 & 41,400&	22,200& 14,900& 3,000 & 1,402 \\
+	\hline
+	4 & 115,583 & 59,792 & 36,083 & 4,000 & 4,044 \\
+	\hline
+	5 & 283,074 & 144,037 &	82,278 & 5,000 & 9,490 \\
+	\hline
+	6 & 693,607 & 349,869 & 191,776 & 6,000 & 22,824 \\
+	\hline
+	7 & 1615,925 & 811,462 & 430,179 & 7,000& 52,254 \\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{RDLU}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - RDLU} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1 & 1,000 & 1,000 & 1,000 & 1,000 & 0,000 \\
+	\hline
+	2 & 10,500 & 6,250 & 5,000 & 2,000& 0,250 \\
+	\hline
+	3 & 41,400&	22,200 & 14,900 & 3,000 & 1,401 \\
+	\hline
+	4 & 115,583 & 59,792 & 36,083 & 4,000 & 3,921 \\
+	\hline
+	5 & 283,074 & 144,037 &	82,278 & 5,000 & 9,518 \\
+	\hline
+	6 & 693,738 & 349,869 & 191,776 & 6,000 & 22,855 \\
+	\hline
+	7 & 1616,368 & 811,684 & 430,259 & 7,000& 52,230 \\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{DRLU}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - DRLU} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1 & 1,000 & 1,000 & 1,000 & 1,000 & 0,000 \\
+	\hline
+	2 & 10,500 & 6,250 & 5,000 & 2,000& 0,510 \\
+	\hline
+	3 & 41,400&	22,200& 14,900 & 3,000 & 1,602 \\
+	\hline
+	4 & 115,583 & 59,792 & 36,083 & 4,000 & 4,003 \\
+	\hline
+	5 & 283,074 & 144,037 &	82,278 & 5,000 & 9,638 \\
+	\hline
+	6 & 693,607 & 349,804 & 191,766 & 6,000 & 22,978 \\
+	\hline
+	7 & 1615,925 & 811,462 & 430,179 & 7,000& 52,325 \\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{LUDR}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - LUDR} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&5,000&3,000&3,000&1,000&0,000 \\
+	\hline
+	2&26,500&14,250&11,000&2,000&0,501 \\
+	\hline
+	3&74,200&38,600&25,700&3,000&2,602 \\
+	\hline
+	4&162,250&83,125	50,417&4,000&5,296 \\
+	\hline
+	5&327,815&166,407&96,056&5,000&10,862 \\
+	\hline
+	6&688,897&347,449&192,047&6,000&22,621 \\
+	\hline
+	7&1517,925&762,462&406,594&7,000&49,877 \\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{LURD}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - LURD} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&5,000&3,000&3,000&1,000&0,501 \\
+	\hline
+	2&26,500&14,250&11,000&2,000&1,252 \\
+	\hline
+	3&74,200&38,600&25,700&3,000&2,641\\
+	\hline
+	4&162,250&83,125	&50,417&4,000&5,359\\
+	\hline
+	5&327,815&166,407&96,056&5,000&10,880\\
+	\hline
+	6&689,028&347,514&192,056&6,000&23,201\\
+	\hline
+	7&1518,368&762,684&406,675&7,000&49,777\\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{ULDR}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - ULDR} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&5,000&3,000&3,000&1,000&0,000\\
+	\hline
+	2&26,500&14,250&11,000&2,000&1,001\\
+	\hline
+	3&74,200&38,600&25,700&3,000&2,603\\
+	\hline
+	4&162,250&83,125	50,417&4,000&5,384\\
+	\hline
+	5&327,815&166,407&96,056&5,000&10,907\\
+	\hline
+	6&689,028&347,514&192,056&6,000&22,818\\
+	\hline
+	7&1518,368&762,684&406,675&7,000&50,407\\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{ULRD}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{BFS Uśrednione - ULRD} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&5,000&3,000&3,000&1,000&0,000\\
+	\hline
+	2&26,500&14,250&11,000&2,000&1,001\\
+	\hline
+	3&74,200&38,600&25,700&3,000&2,502\\
+	\hline
+	4&162,250&83,125	50,417&4,000&5,463\\
+	\hline
+	5&327,815&166,407&96,056&5,000&10,858\\
+	\hline
+	6&688,897&347,449&192,047&6,000&22,795\\
+	\hline
+	7&1517,925&762,462&406,594&7,000&50,067\\
+	\hline
+	\end{tabular}
+\end{center}
+
+\begin{center}
+	\title{\textbf{DFS}}
+\end{center}
+
+\subsection{DRUL}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - DRUL} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{RDUL}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - RDUL} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{RDLU}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - RDLU} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{DRLU}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - DRLU} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{LUDR}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - LUDR} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{LURD}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - LURD} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{ULDR}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - ULDR} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsubsection{ULRD}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{DFS Uśrednione - ULRD} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	
+	\hline
+	\end{tabular}
+\end{center}
+
+\begin{center}
+	\title{\textbf{A*}}
+\end{center}
+
+\subsection{Metryka Hamminga}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{A* Uśrednione - Hamming} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&7,000&1,000&1,000&1,000&0,000 \\
+	\hline
+	2&13,000&2,000&2,000&2,000&0,501\\
+	\hline
+	3 &19,000&3,000&3,000&3,000&0,500\\
+	\hline
+	4 &28,185&4,167&4,167&4,167&0,959\\
+	\hline
+	5 &28,185&394,870&9,778&394,870&75,100\\
+	\hline
+	6&29,290&994,084&15,514&994,084&188,031\\
+	\hline
+	7 &27,123&1773,250&23,311&1773,250&340,677\\
+	\hline
+	\end{tabular}
+\end{center}
+
+\subsection{Metryka Manhattan}
+\begin{center}
+	\begin{tabular}{ | p{1.6cm} | p{1.4cm} | p{1.8cm} | p{2cm} | p{2.2cm} | p{2cm} | }
+	\hline
+	\multicolumn{6}{|c|}{A* Uśrednione - Manhattan} \\
+	\hline
+	Odległość od stanu zero & Długość rozwiązania & Liczba stanów odwiedzonych & Liczba stanów przetworzonych & Maksymalna głębokość rekursji & Czas wykonania [ms]\\
+	\hline
+	1&7,000&1,000&1,000&1,000&1,008 \\
+	\hline
+	2&13,000&2,000&2,000&2,000&0,501\\
+	\hline
+	3 &19,000&3,000&3,000&3,000&0,701\\
+	\hline
+	4& 25,167&4,000&4,000&4,000&0,948\\
+	\hline
+	5& 33,074&91,963&5,852&91,963&19,920\\
+	\hline
+	6& 40,290&222,729&8,720&222,729&48,376\\
+	\hline
+	7& 42,406&708,175&13,151&708,175&152,748\\	
+	\hline
+	\end{tabular}
+\end{center}
 }
 
 \section{Dyskusja}
