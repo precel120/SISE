@@ -21,7 +21,7 @@ x_train, x_test = x[:-1541], x[-1540:]
 y_train, y_test = y[:-1541], y[-1540:]
 
 # Add previous time steps
-prev_steps = 50
+prev_steps = 80
 for it in range(x_train.__len__()):
     for j in range(prev_steps):
         x_train[it].append(x_train[it - j][0])
@@ -39,12 +39,11 @@ x_train = scaler.transform(x_train)
 x_test = scaler.transform(x_test)
 
 # Creating MLP model and training on data
-mlp = MLPRegressor(hidden_layer_sizes=(30,), activation='relu', solver='adam', max_iter=500, verbose=True)
+mlp = MLPRegressor(hidden_layer_sizes=(30, 30, 30), activation='relu', solver='adam', max_iter=300, verbose=True)
 mlp.fit(x_train, y_train)
 
 # Predictions and plotting
 predict_train = mlp.predict(x_train)
-print(type(predict_train))
 print(mean_squared_error(y_train, predict_train))
 predict_test = mlp.predict(x_test)
 print(mean_squared_error(y_test, predict_test))
