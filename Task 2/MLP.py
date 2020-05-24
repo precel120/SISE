@@ -17,8 +17,8 @@ for it in range(data[input_columns[0]].__len__()):
     y.append([data[target_columns[0]][it], data[target_columns[1]][it]])
 
 # Splitting data into train and test
-x_train, x_test = x[:-1541], x[-1540:]
-y_train, y_test = y[:-1541], y[-1540:]
+x_train, x_test = x[:-1540], x[-1540:]
+y_train, y_test = y[:-1540], y[-1540:]
 
 # Add previous time steps
 prev_steps = 80
@@ -46,6 +46,7 @@ mlp.fit(x_train, y_train)
 predict_train = mlp.predict(x_train)
 print(mean_squared_error(y_train, predict_train))
 predict_test = mlp.predict(x_test)
+print(predict_test)
 print(mean_squared_error(y_test, predict_test))
 pl.clf()
 pl.plot(predict_train[:, 0], predict_train[:, 1], 'g.', label='Train data')
