@@ -41,12 +41,12 @@ x_test = scaler.transform(x_test)
 # Creating MLP model and training on data
 mlp = MLPRegressor(hidden_layer_sizes=(30, 30, 30), activation='relu', solver='adam', max_iter=300, verbose=True)
 mlp.fit(x_train, y_train)
+print(mlp.coefs_)
 
 # Predictions and plotting
 predict_train = mlp.predict(x_train)
 print(mean_squared_error(y_train, predict_train))
 predict_test = mlp.predict(x_test)
-print(predict_test)
 print(mean_squared_error(y_test, predict_test))
 pl.clf()
 pl.plot(predict_train[:, 0], predict_train[:, 1], 'g.', label='Train data')
