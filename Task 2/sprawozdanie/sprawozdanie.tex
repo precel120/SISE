@@ -31,7 +31,7 @@
 	2. Liczebność neuronów w poszczególnych warstwach - 162, 30, 30, 30, 2 \\
 	3. Funkcja aktywacji zastosowana w poszczególnych warstwach - RELU \\ (Rectified Linear Unit), która wyrażana jest wzorem y = max(0, x). Dla wszystkich wartości negatywnych przyjmuje wartość 0, natomiast dla wartości pozytywnych jest liniowa \\
 	4. Liczba próbek z poprzednich chwil czasowych wykorzystywanych przez sieć neuronową - 80 \\
-	5. Wagi poszczególnych neuronów w warstwach - zmieniane są ze stałą wartością 0.001 \\
+	5. Wagi poszczególnych neuronów w warstwach - zmieniane są ze stałą wartością 0.001, wartość domyślna dla tej biblioteki \\
  }
 
 \section{Opis algorytmu uczenia sieci neuronowej}
@@ -58,7 +58,13 @@
 
 \section{Kod źródłowy programu do uczenia i testowania sieci neuronowej}
 {
-	Zdecydowaliśmy się nie umieszczać kodu źródłowego, ponieważ wykorzystywaliśmy wysokopoziomowe biblioteki, przez co kod odpowiadający zarówno za uczenie jak i testowanie zajmuje 	bardzo mało linijek kodu.
+	\begin{figure}[htp]
+	\centering
+	\includegraphics[width=15cm]{code.png}
+	\caption{Kod źródłowy programu.}
+	\label{fig:lion}
+	\end{figure}
+	Za naukę odpowiada metoda fit wywoływana na modelu sieci neuronowej. Z kolei za testowanie odpowiada drugie wywołanie metody predict, gdzie jako parametr przyjmowany jest zbiór testowy.
 }
 
 \begin{thebibliography}{0}
